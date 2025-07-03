@@ -97,7 +97,7 @@ const Register = () => {
 
     try {
       const response = await fetch(
-        "http://172.20.10.2:5000/api/auth/register",
+        "http://192.168.100.128:5000/api/auth/register",
         {
           method: "POST",
           headers: {

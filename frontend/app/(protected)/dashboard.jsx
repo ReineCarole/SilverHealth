@@ -13,16 +13,20 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LineChart } from "react-native-chart-kit";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
-const API_URL = "http://172.20.10.2:5000";
+import { useRouter } from "expo-router";
+
+const API_URL = "http://192.168.100.182"; // your ESP32 IP
 
 const { width } = Dimensions.get("window");
+const router = useRouter();
 
 const Dashboard = () => {
   const [healthData, setHealthData] = useState({
-    bloodPressure: { systolic: 0, diastolic: 0 },
+    bloodPressure: { systolic: 120, diastolic: 80 }, // fallback dummy
     heartRate: 0,
-    oxygenLevel: 0,
+    oxygenLevel: 98, // fallback dummy
     bodyTemperature: 0,
   });
   const [deviceStatus, setDeviceStatus] = useState({
@@ -32,8 +36,6 @@ const Dashboard = () => {
   });
   const [chartData, setChartData] = useState({
     heartRate: [],
-    bloodPressure: [],
-    temperature: [],
   });
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -42,75 +44,58 @@ const Dashboard = () => {
   useEffect(() => {
     loadDashboardData();
     loadUserInfo();
-    const interval = setInterval(loadDashboardData, 60000); // Update every minute
+    const interval = setInterval(loadDashboardData, 60000); // auto-refresh every minute
     return () => clearInterval(interval);
   }, []);
 
   const loadUserInfo = async () => {
     try {
-      const name = await AsyncStorage.getItem("userName");
-      setUserName(name || "User");
+      const name = await AsyncStorage.getItem("userFullName");
+      if (name && name.trim().length > 0) {
+        setUserName(name);
+      } else {
+        setUserName("User");
+      }
     } catch (error) {
       console.error("Error loading user info:", error);
+      setUserName("User");
     }
   };
 
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
-      const token = await AsyncStorage.getItem("userToken");
-      const userId = await AsyncStorage.getItem("userId");
-
-      // Fetch latest health data
-      const healthResponse = await fetch(
-        `${API_URL}/api/health-data/latest/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+      const response = await fetch(`${API_URL}/data`);
+      if (response.ok) {
+        const data = await response.json();
+        setHealthData({
+          bloodPressure: {
+            systolic: data.systolic ?? 120,
+            diastolic: data.diastolic ?? 80,
           },
-        }
-      );
-
-      // Fetch device status
-      const deviceResponse = await fetch(
-        `${API_URL}/api/device/status/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      // Fetch chart data (last 7 days)
-      const chartResponse = await fetch(
-        `${API_URL}/api/health-data/chart/${userId}?days=7`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (healthResponse.ok) {
-        const healthResult = await healthResponse.json();
-        setHealthData(healthResult);
-      }
-
-      if (deviceResponse.ok) {
-        const deviceResult = await deviceResponse.json();
-        setDeviceStatus(deviceResult);
-      }
-
-      if (chartResponse.ok) {
-        const chartResult = await chartResponse.json();
-        setChartData(chartResult);
+          heartRate: data.heart_rate,
+          oxygenLevel: data.oxygen ?? 98,
+          bodyTemperature: data.temperature,
+        });
+        setDeviceStatus({
+          isConnected: true,
+          batteryLevel: 75,
+          lastSync: new Date().toISOString(),
+        });
+        setChartData((prev) => ({
+          ...prev,
+          heartRate: [
+            ...prev.heartRate.slice(-6),
+            { timestamp: Date.now(), value: data.heart_rate },
+          ],
+        }));
+      } else {
+        console.error("ESP32 responded with error");
+        setDeviceStatus((prev) => ({ ...prev, isConnected: false }));
       }
     } catch (error) {
-      console.error("Error loading dashboard data:", error);
-      Alert.alert("Error", "Failed to load dashboard data");
+      console.error("Error loading data from ESP32:", error);
+      setDeviceStatus((prev) => ({ ...prev, isConnected: false }));
     } finally {
       setIsLoading(false);
     }
@@ -122,26 +107,10 @@ const Dashboard = () => {
     setRefreshing(false);
   };
 
-  const connectDevice = async () => {
-    try {
-      Alert.alert(
-        "Connect Device",
-        "Make sure your health monitoring device is turned on and in pairing mode.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Connect", onPress: initiateConnection },
-        ]
-      );
-    } catch (error) {
-      console.error("Error connecting device:", error);
-    }
-  };
-
-  const initiateConnection = async () => {
-    // Implement Bluetooth connection logic here
+  const connectDevice = () => {
     Alert.alert(
-      "Info",
-      "Device connection feature will be implemented based on your Bluetooth module"
+      "Connect Device",
+      "Make sure your health monitoring device is turned on and connected to WiFi."
     );
   };
 
@@ -153,21 +122,17 @@ const Dashboard = () => {
         if (value.systolic < 90 || value.diastolic < 60)
           return { status: "low", color: "#FF9500" };
         return { status: "normal", color: "#34C759" };
-
       case "heartRate":
         if (value > 100) return { status: "high", color: "#FF3B30" };
         if (value < 60) return { status: "low", color: "#FF9500" };
         return { status: "normal", color: "#34C759" };
-
       case "oxygenLevel":
         if (value < 95) return { status: "low", color: "#FF3B30" };
         return { status: "normal", color: "#34C759" };
-
       case "temperature":
         if (value > 37.5) return { status: "high", color: "#FF3B30" };
         if (value < 36.1) return { status: "low", color: "#FF9500" };
         return { status: "normal", color: "#34C759" };
-
       default:
         return { status: "normal", color: "#34C759" };
     }
@@ -229,9 +194,7 @@ const Dashboard = () => {
         <View style={styles.deviceStatusCard}>
           <View style={styles.deviceStatusHeader}>
             <Ionicons
-              name={
-                deviceStatus.isConnected ? "bluetooth" : "bluetooth-outline"
-              }
+              name={deviceStatus.isConnected ? "wifi" : "wifi-outline"}
               size={24}
               color={deviceStatus.isConnected ? "#34C759" : "#666"}
             />
@@ -366,7 +329,10 @@ const Dashboard = () => {
           </View>
 
           {/* Emergency Button */}
-          <TouchableOpacity style={styles.emergencyCard}>
+          <TouchableOpacity
+            style={styles.emergencyCard}
+            onPress={() => router.push("/tabs/emergency-contacts")}
+          >
             <Ionicons name="call" size={24} color="#fff" />
             <Text style={styles.emergencyText}>Emergency</Text>
             <Text style={styles.emergencySubtext}>Tap for help</Text>

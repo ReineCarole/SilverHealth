@@ -11,7 +11,7 @@ import { Tabs, useRouter, useSegments } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "http://172.20.10.2:5000";
+const API_URL = "http://192.168.100.128:5000";
 
 export default function RootLayout() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -39,7 +39,7 @@ export default function RootLayout() {
   const checkAuthStatus = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken");
-
+  
       if (token) {
         const response = await fetch(`${API_URL}/api/auth/profile`, {
           method: "GET",
@@ -48,11 +48,16 @@ export default function RootLayout() {
             "Content-Type": "application/json",
           },
         });
-
+  
         if (response.ok) {
+          const userData = await response.json();
+  
+          // Add this line to save the fullName in AsyncStorage
+          await AsyncStorage.setItem("userFullName", userData.fullName);
+  
           setIsAuthenticated(true);
         } else {
-          await AsyncStorage.multiRemove(["userToken", "userId", "userName"]);
+          await AsyncStorage.multiRemove(["userToken", "userId", "userFullName"]);
           setIsAuthenticated(false);
         }
       } else {
@@ -65,12 +70,13 @@ export default function RootLayout() {
       setIsLoading(false);
     }
   };
+  
 
   if (isLoading || isAuthenticated === null) {
     return (
       <View style={styles.loadingContainer}>
         <Ionicons name="heart-outline" size={48} color="#007AFF" />
-        <Text style={styles.loadingText}>Health Monitor</Text>
+        <Text style={styles.loadingText}>SilverHealth</Text>
       </View>
     );
   }

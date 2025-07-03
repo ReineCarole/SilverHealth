@@ -15,7 +15,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-const API_URL = "http://172.20.10.2:5000";
+
+const API_URL = "http://192.168.100.128:5000";
+
 const Profile = () => {
   const [userInfo, setUserInfo] = useState({
     name: "",
@@ -236,7 +238,7 @@ const Profile = () => {
   };
 
   const navigateToScreen = (screenName) => {
-    router.push(`/(tabs)/${screenName}`);
+    router.push(`/tabs/${screenName}`);
   };
 
   if (isLoading) {
@@ -298,6 +300,7 @@ const Profile = () => {
               onChangeText={(text) => setUserInfo({ ...userInfo, name: text })}
               editable={isEditing}
               placeholder="Enter your full name"
+              autoCapitalize="words"
             />
           </View>
 
@@ -310,6 +313,7 @@ const Profile = () => {
               editable={isEditing}
               placeholder="Enter your email"
               keyboardType="email-address"
+              autoCapitalize="none"
             />
           </View>
 
@@ -447,7 +451,7 @@ const Profile = () => {
 
           <TouchableOpacity
             style={styles.actionItem}
-            onPress={() => navigateToScreen("device-management")}
+            onPress={() => navigateToScreen("wifi-connect")}
           >
             <Ionicons name="bluetooth-outline" size={20} color="#007AFF" />
             <Text style={styles.actionLabel}>Device Management</Text>
@@ -456,20 +460,26 @@ const Profile = () => {
 
           <TouchableOpacity
             style={styles.actionItem}
-            onPress={() => navigateToScreen("settings")}
+            onPress={() => navigateToScreen("setting")}
           >
             <Ionicons name="settings-outline" size={20} color="#007AFF" />
             <Text style={styles.actionLabel}>Advanced Settings</Text>
             <Ionicons name="chevron-forward" size={16} color="#C7C7CC" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem}>
+          <TouchableOpacity
+            onPress={() => navigateToScreen("help-and-support")}
+            style={styles.actionItem}
+          >
             <Ionicons name="help-circle-outline" size={20} color="#007AFF" />
             <Text style={styles.actionLabel}>Help & Support</Text>
             <Ionicons name="chevron-forward" size={16} color="#C7C7CC" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem}>
+          <TouchableOpacity
+            onPress={() => navigateToScreen("policy")}
+            style={styles.actionItem}
+          >
             <Ionicons name="document-text-outline" size={20} color="#007AFF" />
             <Text style={styles.actionLabel}>Privacy Policy</Text>
             <Ionicons name="chevron-forward" size={16} color="#C7C7CC" />
@@ -561,53 +571,54 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginHorizontal: 20,
     marginVertical: 10,
-    borderRadius: 12,
-    padding: 20,
+    padding: 15,
+    borderRadius: 10,
     shadowColor: "#000",
+    shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 2,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "600",
     marginBottom: 15,
+    color: "#111",
   },
   inputGroup: {
-    marginBottom: 15,
+    marginBottom: 12,
   },
   inputLabel: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#333",
-    marginBottom: 8,
+    marginBottom: 6,
+    color: "#444",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#E5E5EA",
+    borderColor: "#ccc",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
+    color: "#222",
     backgroundColor: "#fff",
   },
   inputDisabled: {
-    backgroundColor: "#f8f9fa",
-    color: "#666",
+    backgroundColor: "#F0F0F0",
+    color: "#999",
   },
   saveButton: {
     backgroundColor: "#007AFF",
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: "center",
+    paddingVertical: 14,
+    borderRadius: 10,
     marginTop: 10,
+    alignItems: "center",
   },
   saveButtonText: {
     color: "#fff",
-    fontSize: 16,
     fontWeight: "600",
+    fontSize: 16,
   },
   settingItem: {
     flexDirection: "row",
@@ -615,50 +626,48 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: "#eee",
   },
   settingInfo: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 1,
   },
   settingLabel: {
-    fontSize: 16,
-    color: "#333",
     marginLeft: 12,
+    fontSize: 16,
+    color: "#444",
   },
   actionItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 15,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: "#eee",
   },
   actionLabel: {
-    fontSize: 16,
-    color: "#333",
-    marginLeft: 12,
     flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    color: "#007AFF",
   },
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
   logoutText: {
-    fontSize: 16,
     color: "#FF3B30",
-    fontWeight: "500",
+    fontSize: 18,
+    fontWeight: "600",
     marginLeft: 8,
   },
   versionSection: {
+    marginVertical: 20,
     alignItems: "center",
-    paddingVertical: 20,
   },
   versionText: {
-    fontSize: 14,
-    color: "#666",
+    color: "#aaa",
   },
 });
 
