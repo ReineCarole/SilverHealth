@@ -45,7 +45,7 @@ const Dashboard = () => {
   useEffect(() => {
     loadDashboardData();
     loadUserInfo();
-    const interval = setInterval(loadDashboardData, 5000); // auto-refresh every minute
+    const interval = setInterval(loadDashboardData, 5000); // auto-refresh every 5 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -71,8 +71,8 @@ const Dashboard = () => {
         const data = await response.json();
         setHealthData({
           bloodPressure: {
-            systolic: data.systolic ?? 120,
-            diastolic: data.diastolic ?? 80,
+            systolic: data.sbp ?? 120,
+            diastolic: data.dbp ?? 80,
           },
           heartRate: data.heart_rate,
           oxygenLevel: data.oxygen ?? 98,
@@ -240,8 +240,8 @@ const Dashboard = () => {
             </View>
             <View style={styles.bpContainer}>
               <Text style={styles.bpValue}>
-                {healthData.bloodPressure.systolic}/
-                {healthData.bloodPressure.diastolic}
+                {healthData.bloodPressure.systolic.toFixed(1)}/
+                {healthData.bloodPressure.diastolic.toFixed(1)}
               </Text>
               <Text style={styles.bpUnit}>mmHg</Text>
             </View>
@@ -292,7 +292,9 @@ const Dashboard = () => {
               <Ionicons name="fitness-outline" size={20} color="#007AFF" />
               <Text style={styles.metricTitle}>Blood Oxygen</Text>
             </View>
-            <Text style={styles.metricValue}>{healthData.oxygenLevel}</Text>
+            <Text style={styles.metricValue}>
+              {healthData.oxygenLevel.toFixed(1)}
+            </Text>
             <Text style={styles.metricUnit}>%</Text>
             <View
               style={[
@@ -564,142 +566,131 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   bpValue: {
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: "bold",
-    color: "#333",
+    color: "#FF3B30",
   },
   bpUnit: {
-    fontSize: 16,
-    color: "#666",
-    marginLeft: 8,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#FF3B30",
+    marginLeft: 6,
+    marginBottom: 10,
   },
   statusIndicator: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
     alignSelf: "flex-start",
+    borderRadius: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
   },
   statusText: {
     color: "#fff",
-    fontSize: 12,
     fontWeight: "600",
   },
   statusDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     position: "absolute",
     top: 16,
     right: 16,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
   },
   emergencyCard: {
     backgroundColor: "#FF3B30",
-    borderRadius: 12,
-    padding: 16,
-    width: (width - 50) / 2,
+    marginTop: 16,
+    marginHorizontal: 20,
+    borderRadius: 16,
+    paddingVertical: 24,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: "#FF3B30",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 6,
   },
   emergencyText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "700",
+    fontSize: 20,
     marginTop: 8,
   },
   emergencySubtext: {
     color: "#fff",
-    fontSize: 12,
-    opacity: 0.8,
-    marginTop: 2,
+    fontSize: 14,
+    marginTop: 4,
   },
   chartSection: {
-    marginHorizontal: 20,
-    marginTop: 30,
+    marginTop: 20,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 12,
     color: "#333",
-    marginBottom: 15,
   },
   chartContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: 16,
+    overflow: "hidden",
   },
   chart: {
-    marginVertical: 8,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   quickActions: {
-    marginHorizontal: 20,
-    marginTop: 30,
+    marginTop: 20,
+    paddingHorizontal: 20,
   },
   actionsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 16,
+    justifyContent: "space-between",
   },
   actionButton: {
-    backgroundColor: "#fff",
+    width: (width - 60) / 4,
+    backgroundColor: "#E6F0FF",
     borderRadius: 12,
-    padding: 16,
-    width: (width - 50) / 2,
+    paddingVertical: 12,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   actionText: {
-    fontSize: 14,
-    color: "#333",
     marginTop: 8,
-    fontWeight: "500",
+    fontSize: 12,
+    color: "#007AFF",
+    fontWeight: "600",
+    textAlign: "center",
   },
   tipsSection: {
-    marginHorizontal: 20,
-    marginTop: 30,
-    marginBottom: 20,
+    marginTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   tipCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
     flexDirection: "row",
-    alignItems: "flex-start",
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 3,
+    elevation: 2,
   },
   tipContent: {
     marginLeft: 12,
     flex: 1,
   },
   tipTitle: {
-    fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    fontSize: 16,
     marginBottom: 4,
+    color: "#333",
   },
   tipDescription: {
     fontSize: 14,
     color: "#666",
-    lineHeight: 20,
   },
 });
 
