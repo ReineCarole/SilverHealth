@@ -39,7 +39,7 @@ export default function RootLayout() {
   const checkAuthStatus = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken");
-  
+
       if (token) {
         const response = await fetch(`${API_URL}/api/auth/profile`, {
           method: "GET",
@@ -48,16 +48,20 @@ export default function RootLayout() {
             "Content-Type": "application/json",
           },
         });
-  
+
         if (response.ok) {
           const userData = await response.json();
-  
+
           // Add this line to save the fullName in AsyncStorage
           await AsyncStorage.setItem("userFullName", userData.fullName);
-  
+
           setIsAuthenticated(true);
         } else {
-          await AsyncStorage.multiRemove(["userToken", "userId", "userFullName"]);
+          await AsyncStorage.multiRemove([
+            "userToken",
+            "userId",
+            "userFullName",
+          ]);
           setIsAuthenticated(false);
         }
       } else {
@@ -70,7 +74,6 @@ export default function RootLayout() {
       setIsLoading(false);
     }
   };
-  
 
   if (isLoading || isAuthenticated === null) {
     return (

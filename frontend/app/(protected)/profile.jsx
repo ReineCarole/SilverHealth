@@ -49,7 +49,7 @@ const Profile = () => {
       const userId = await AsyncStorage.getItem("userId");
 
       // Load user info from storage first (offline support)
-      const storedName = await AsyncStorage.getItem("userName");
+      const storedName = await AsyncStorage.getItem("userFullName");
       const storedEmail = await AsyncStorage.getItem("userEmail");
 
       if (storedName || storedEmail) {
@@ -260,7 +260,7 @@ const Profile = () => {
             onPress={() => setIsEditing(!isEditing)}
           >
             <Ionicons
-              name={isEditing ? "checkmark" : "pencil"}
+              name={isEditing ? "close" : "pencil"}
               size={20}
               color="#007AFF"
             />
@@ -288,80 +288,95 @@ const Profile = () => {
           </Text>
         </View>
 
-        {/* Personal Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Personal Information</Text>
+        {/* Personal Information - Only show when editing */}
+        {isEditing && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Personal Information</Text>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Full Name</Text>
-            <TextInput
-              style={[styles.input, !isEditing && styles.inputDisabled]}
-              value={userInfo.name}
-              onChangeText={(text) => setUserInfo({ ...userInfo, name: text })}
-              editable={isEditing}
-              placeholder="Enter your full name"
-              autoCapitalize="words"
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <TextInput
+                style={styles.input}
+                value={userInfo.name}
+                onChangeText={(text) =>
+                  setUserInfo({ ...userInfo, name: text })
+                }
+                placeholder="Enter your full name"
+                autoCapitalize="words"
+              />
+            </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Email</Text>
-            <TextInput
-              style={[styles.input, !isEditing && styles.inputDisabled]}
-              value={userInfo.email}
-              onChangeText={(text) => setUserInfo({ ...userInfo, email: text })}
-              editable={isEditing}
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <TextInput
+                style={styles.input}
+                value={userInfo.email}
+                onChangeText={(text) =>
+                  setUserInfo({ ...userInfo, email: text })
+                }
+                placeholder="Enter your email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Phone Number</Text>
-            <TextInput
-              style={[styles.input, !isEditing && styles.inputDisabled]}
-              value={userInfo.phone}
-              onChangeText={(text) => setUserInfo({ ...userInfo, phone: text })}
-              editable={isEditing}
-              placeholder="Enter your phone number"
-              keyboardType="phone-pad"
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <TextInput
+                style={styles.input}
+                value={userInfo.phone}
+                onChangeText={(text) =>
+                  setUserInfo({ ...userInfo, phone: text })
+                }
+                placeholder="Enter your phone number"
+                keyboardType="phone-pad"
+              />
+            </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Date of Birth</Text>
-            <TextInput
-              style={[styles.input, !isEditing && styles.inputDisabled]}
-              value={userInfo.dateOfBirth}
-              onChangeText={(text) =>
-                setUserInfo({ ...userInfo, dateOfBirth: text })
-              }
-              editable={isEditing}
-              placeholder="DD/MM/YYYY"
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Date of Birth</Text>
+              <TextInput
+                style={styles.input}
+                value={userInfo.dateOfBirth}
+                onChangeText={(text) =>
+                  setUserInfo({ ...userInfo, dateOfBirth: text })
+                }
+                placeholder="DD/MM/YYYY"
+              />
+            </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Emergency Contact</Text>
-            <TextInput
-              style={[styles.input, !isEditing && styles.inputDisabled]}
-              value={userInfo.emergencyContact}
-              onChangeText={(text) =>
-                setUserInfo({ ...userInfo, emergencyContact: text })
-              }
-              editable={isEditing}
-              placeholder="Emergency contact number"
-              keyboardType="phone-pad"
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Emergency Contact</Text>
+              <TextInput
+                style={styles.input}
+                value={userInfo.emergencyContact}
+                onChangeText={(text) =>
+                  setUserInfo({ ...userInfo, emergencyContact: text })
+                }
+                placeholder="Emergency contact number"
+                keyboardType="phone-pad"
+              />
+            </View>
 
-          {isEditing && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Medical Conditions</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={userInfo.medicalConditions}
+                onChangeText={(text) =>
+                  setUserInfo({ ...userInfo, medicalConditions: text })
+                }
+                placeholder="Any medical conditions or allergies"
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+
             <TouchableOpacity style={styles.saveButton} onPress={saveProfile}>
               <Text style={styles.saveButtonText}>Save Changes</Text>
             </TouchableOpacity>
-          )}
-        </View>
+          </View>
+        )}
 
         {/* Settings */}
         <View style={styles.section}>
@@ -604,9 +619,9 @@ const styles = StyleSheet.create({
     color: "#222",
     backgroundColor: "#fff",
   },
-  inputDisabled: {
-    backgroundColor: "#F0F0F0",
-    color: "#999",
+  textArea: {
+    height: 80,
+    textAlignVertical: "top",
   },
   saveButton: {
     backgroundColor: "#007AFF",

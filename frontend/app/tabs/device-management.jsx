@@ -17,7 +17,7 @@ export default function ESP32DataScreen() {
     setLoading(true);
     try {
       // ⚠️ Replace with your ESP32 IP address
-      const response = await axios.get("http://192.168.100.160/data");
+      const response = await axios.get("http://192.168.100.182/data");
       setData(response.data);
     } catch (error) {
       console.error("Error fetching ESP32 data:", error);

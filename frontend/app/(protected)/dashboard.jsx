@@ -40,11 +40,12 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [userName, setUserName] = useState("");
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
     loadUserInfo();
-    const interval = setInterval(loadDashboardData, 60000); // auto-refresh every minute
+    const interval = setInterval(loadDashboardData, 5000); // auto-refresh every minute
     return () => clearInterval(interval);
   }, []);
 
@@ -63,8 +64,8 @@ const Dashboard = () => {
   };
 
   const loadDashboardData = async () => {
+    if (!hasLoadedOnce) setIsLoading(true); // Only show big loader on first load
     try {
-      setIsLoading(true);
       const response = await fetch(`${API_URL}/data`);
       if (response.ok) {
         const data = await response.json();
@@ -97,6 +98,7 @@ const Dashboard = () => {
       console.error("Error loading data from ESP32:", error);
       setDeviceStatus((prev) => ({ ...prev, isConnected: false }));
     } finally {
+      setHasLoadedOnce(true); // Mark that first load is done
       setIsLoading(false);
     }
   };
@@ -163,7 +165,7 @@ const Dashboard = () => {
     },
   };
 
-  if (isLoading && !refreshing) {
+  if (isLoading && !hasLoadedOnce) {
     return (
       <SafeAreaView style={styles.container}>
         <ActivityIndicator size="large" color="#007AFF" style={{ flex: 1 }} />
